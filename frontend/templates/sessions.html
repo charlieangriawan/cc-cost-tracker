@@ -1,16 +1,20 @@
 {{define "content"}}
 <div class="card">
   <div class="card-title">All Sessions</div>
+  <div class="card-meta">
+    <input id="session-filter" type="search" placeholder="Filter sessions by ID, project, or model" autocomplete="off" />
+    <div class="hint">Click any column header to sort</div>
+  </div>
   {{if .Sessions}}
-  <table class="data-table">
+  <table class="data-table session-table">
     <thead>
       <tr>
-        <th>Session ID</th>
-        <th>Project</th>
-        <th>Model</th>
-        <th>Last Active</th>
-        <th class="r">Tokens</th>
-        <th class="r">Cost</th>
+        <th class="sortable" data-col="0" data-type="string">Session ID <span class="sort-arrow"></span></th>
+        <th class="sortable" data-col="1" data-type="string">Project <span class="sort-arrow"></span></th>
+        <th class="sortable" data-col="2" data-type="string">Model <span class="sort-arrow"></span></th>
+        <th class="sortable" data-col="3" data-type="string">Last Active <span class="sort-arrow"></span></th>
+        <th class="r sortable" data-col="4" data-type="number">Tokens <span class="sort-arrow"></span></th>
+        <th class="r sortable" data-col="5" data-type="number">Cost <span class="sort-arrow"></span></th>
       </tr>
     </thead>
     <tbody>
@@ -30,4 +34,81 @@
   <div class="empty">No sessions found. Make sure the Rust backend is running.</div>
   {{end}}
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const filterInput = document.getElementById('session-filter');
+  const table = document.querySelector('.session-table');
+  if (!table) return;
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const headers = Array.from(table.querySelectorAll('th.sortable'));
+  let sortState = {col: null, asc: true};
+
+  function normalizeText(value) {
+    return value.trim().toLowerCase();
+  }
+
+  function getCellValue(row, index, type) {
+    const cell = row.cells[index];
+    if (!cell) return '';
+    let text = cell.textContent || '';
+    if (type === 'number') {
+      const cleaned = text.replace(/[^0-9.\-]/g, '') || '0';
+      return parseFloat(cleaned);
+    }
+    return normalizeText(text);
+  }
+
+  function updateSortIndicators() {
+    headers.forEach((header, index) => {
+      const arrow = header.querySelector('.sort-arrow');
+      if (sortState.col === index) {
+        arrow.textContent = sortState.asc ? '▲' : '▼';
+      } else {
+        arrow.textContent = '';
+      }
+    });
+  }
+
+  function applyFilterAndSort() {
+    const filter = normalizeText(filterInput.value || '');
+    rows.forEach((row) => {
+      const rowText = normalizeText(row.textContent || '');
+      row.style.display = rowText.includes(filter) ? '' : 'none';
+    });
+
+    if (sortState.col === null) return;
+
+    const type = headers[sortState.col].dataset.type || 'string';
+    const sortedRows = rows.slice().sort((a, b) => {
+      const aValue = getCellValue(a, sortState.col, type);
+      const bValue = getCellValue(b, sortState.col, type);
+      if (aValue === bValue) return 0;
+      if (type === 'number') {
+        return sortState.asc ? aValue - bValue : bValue - aValue;
+      }
+      return sortState.asc ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+    });
+    sortedRows.forEach((row) => tbody.appendChild(row));
+  }
+
+  headers.forEach((header, index) => {
+    header.style.cursor = 'pointer';
+    header.addEventListener('click', function () {
+      const clickedCol = index;
+      if (sortState.col === clickedCol) {
+        sortState.asc = !sortState.asc;
+      } else {
+        sortState.col = clickedCol;
+        sortState.asc = true;
+      }
+      updateSortIndicators();
+      applyFilterAndSort();
+    });
+  });
+
+  filterInput.addEventListener('input', applyFilterAndSort);
+  updateSortIndicators();
+});
+</script>
 {{end}}

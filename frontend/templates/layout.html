@@ -167,6 +167,37 @@
       color: var(--txt3);
       margin-bottom: 14px;
     }
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .card-meta input {
+      flex: 1 1 260px;
+      min-width: 220px;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg2);
+      color: var(--txt);
+    }
+    .card-meta .hint {
+      font-size: 11px;
+      color: var(--txt3);
+      white-space: nowrap;
+    }
+    th.sortable {
+      cursor: pointer;
+    }
+    th.sortable .sort-arrow {
+      display: inline-block;
+      width: 1em;
+      text-align: center;
+      margin-left: 5px;
+      color: var(--txt3);
+    }
 
     /* ── Scrollbar ────────────────────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
