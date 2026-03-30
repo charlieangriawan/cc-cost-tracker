@@ -25,7 +25,7 @@ func main() {
 	mux.HandleFunc("/settings", h.Settings)
 	mux.HandleFunc("/rate-card", h.RateCard)
 
-	addr := envOr("FRONTEND_ADDR", ":3000")
+	addr := envOr("FRONTEND_ADDR", ":45123")
 	log.Printf("Frontend listening on http://localhost%s", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
@@ -33,33 +33,53 @@ func main() {
 }
 
 func findStaticDir() string {
-	if _, err := os.Stat("static"); err == nil {
-		return "static"
+	candidates := []string{
+		"static",
+		filepath.Join("frontend", "static"),
 	}
-	exe, err := os.Executable()
-	if err == nil {
-		d := filepath.Join(filepath.Dir(exe), "static")
-		if _, err := os.Stat(d); err == nil {
-			return d
+	for _, path := range candidates {
+		if _, err := os.Stat(path); err == nil {
+			return path
 		}
 	}
-	return "static"
+
+	exe, err := os.Executable()
+	if err == nil {
+		exeDir := filepath.Dir(exe)
+		for _, rel := range []string{"static", filepath.Join("frontend", "static")} {
+			d := filepath.Join(exeDir, rel)
+			if _, err := os.Stat(d); err == nil {
+				return d
+			}
+		}
+	}
+
+	return filepath.Join("frontend", "static")
 }
 
 func findTemplateDir() string {
-	// When running via `go run .` the CWD contains templates/
-	if _, err := os.Stat("templates"); err == nil {
-		return "templates"
+	candidates := []string{
+		"templates",
+		filepath.Join("frontend", "templates"),
 	}
-	// When running a compiled binary, look next to the executable
-	exe, err := os.Executable()
-	if err == nil {
-		d := filepath.Join(filepath.Dir(exe), "templates")
-		if _, err := os.Stat(d); err == nil {
-			return d
+	for _, path := range candidates {
+		if _, err := os.Stat(path); err == nil {
+			return path
 		}
 	}
-	return "templates"
+
+	exe, err := os.Executable()
+	if err == nil {
+		exeDir := filepath.Dir(exe)
+		for _, rel := range []string{"templates", filepath.Join("frontend", "templates")} {
+			d := filepath.Join(exeDir, rel)
+			if _, err := os.Stat(d); err == nil {
+				return d
+			}
+		}
+	}
+
+	return filepath.Join("frontend", "templates")
 }
 
 func envOr(key, fallback string) string {

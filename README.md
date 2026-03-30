@@ -17,7 +17,7 @@ Claude Code writes detailed JSONL logs to `~/.claude/projects/` after every API 
 ## Architecture
 
 ```
-Rust backend (port 8080)          Go frontend (port 3000)
+Rust backend (port 8080)          Go frontend (port 45123)
 ────────────────────────          ───────────────────────
 ~/.claude/projects/ watcher  ───► Go templates + HTMX
 JSONL parser + dedup         ←──  REST API calls (SSR)
@@ -49,7 +49,7 @@ make install   # installs Rust (via rustup) and Go (via brew/apt) if needed
 make dev       # builds and starts both servers, opens browser
 ```
 
-That's it. The dashboard opens at **http://localhost:3000**.
+That's it. The dashboard opens at **http://localhost:45123**.
 
 ---
 
@@ -103,7 +103,7 @@ Model date suffixes (e.g. `claude-opus-4-6-20250514`) are stripped automatically
 | Service | Default | Override |
 |---|---|---|
 | Rust backend | `8080` | `PORT=8080 ./cc-cost-backend` |
-| Go frontend | `3000` | `FRONTEND_ADDR=:3000 ./cc-cost-frontend` |
+| Go frontend | `45123` | `FRONTEND_ADDR=:45123 ./cc-cost-frontend` |
 | Backend URL (frontend uses) | `http://localhost:8080` | `BACKEND_URL=http://localhost:8080 ./cc-cost-frontend` |
 
 ---
