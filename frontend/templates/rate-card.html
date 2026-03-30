@@ -1,0 +1,38 @@
+{{define "content"}}
+<div class="card">
+  <div class="card-title">API Pricing — Pay-as-you-go Rates (per million tokens)</div>
+  {{if .Entries}}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th class="r">Input</th>
+        <th class="r">Output</th>
+        <th class="r">Cache Write</th>
+        <th class="r">Cache Read</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Entries}}
+      <tr>
+        <td>
+          <span class="mono" style="font-size:13px;">{{.Model}}</span>
+        </td>
+        <td class="r mono accent">${{printf "%.2f" .InputPerMtok}}</td>
+        <td class="r mono accent">${{printf "%.2f" .OutputPerMtok}}</td>
+        <td class="r mono" style="color:var(--txt2);">${{printf "%.2f" .CacheWritePerMtok}}</td>
+        <td class="r mono" style="color:var(--txt2);">${{printf "%.2f" .CacheReadPerMtok}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="empty">Could not load rate card. Is the backend running?</div>
+  {{end}}
+  <div style="margin-top:16px;padding:12px 14px;background:var(--bg4);border-radius:var(--radius);border:1px solid var(--border2);">
+    <div style="font-size:11.5px;color:var(--txt3);line-height:1.6;">
+      Costs shown are equivalent pay-as-you-go API rates. With Claude Max subscription ($200/mo), actual billing differs — these numbers show what you would have paid on the API.
+    </div>
+  </div>
+</div>
+{{end}}

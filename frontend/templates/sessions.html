@@ -1,0 +1,33 @@
+{{define "content"}}
+<div class="card">
+  <div class="card-title">All Sessions</div>
+  {{if .Sessions}}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Session ID</th>
+        <th>Project</th>
+        <th>Model</th>
+        <th>Last Active</th>
+        <th class="r">Tokens</th>
+        <th class="r">Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Sessions}}
+      <tr>
+        <td><span class="mono dim" style="font-size:11.5px;" title="{{.ID}}">{{shortID .ID}}…</span></td>
+        <td><span class="muted">{{.Project}}</span></td>
+        <td><span class="badge">{{shortModel .Model}}</span></td>
+        <td><span class="mono dim" style="font-size:11.5px;">{{fmtDate .LastActive}}</span></td>
+        <td class="r mono dim" style="font-size:11.5px;">{{fmtTokens .TotalTokens}}</td>
+        <td class="r mono accent" style="font-weight:600;">{{fmtCost .Cost}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="empty">No sessions found. Make sure the Rust backend is running.</div>
+  {{end}}
+</div>
+{{end}}

@@ -1,0 +1,39 @@
+{{define "content"}}
+<div style="max-width:560px;">
+  <div class="card">
+    <div class="card-title">Backend Connection</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:5px;">Backend URL</div>
+        <div class="mono" style="padding:9px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;color:var(--txt);">http://localhost:8080</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:5px;">WebSocket URL</div>
+        <div class="mono" style="padding:9px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;color:var(--txt);">ws://localhost:8080/ws</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:5px;">Logs directory</div>
+        <div class="mono" style="padding:9px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;color:var(--txt);">~/.claude/projects/</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">About</div>
+    <div style="display:flex;flex-direction:column;gap:8px;color:var(--txt2);font-size:13px;">
+      <div>Real-time Claude Code cost tracker.</div>
+      <div>Parses JSONL logs from <span class="mono" style="font-size:12px;">~/.claude/projects/</span> and calculates equivalent pay-as-you-go API costs.</div>
+      <div style="margin-top:4px;display:flex;gap:20px;">
+        <div>
+          <div style="font-size:10.5px;color:var(--txt3);margin-bottom:2px;">Backend</div>
+          <div class="mono badge">Rust + Axum</div>
+        </div>
+        <div>
+          <div style="font-size:10.5px;color:var(--txt3);margin-bottom:2px;">Frontend</div>
+          <div class="mono badge">Go + HTMX</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,310 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCTRACK — {{.Title}}</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Reset ────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0c0d0e;
+      --bg2:        #131517;
+      --bg3:        #191b1e;
+      --bg4:        #1f2224;
+      --hover:      #242729;
+      --accent:     #f5a623;
+      --accent2:    #d4891b;
+      --accent-bg:  rgba(245,166,35,.10);
+      --accent-border: rgba(245,166,35,.25);
+      --green:      #22c55e;
+      --red:        #ef4444;
+      --blue:       #3b82f6;
+      --purple:     #a855f7;
+      --txt:        #e2e2e2;
+      --txt2:       #9ca3af;
+      --txt3:       #5a6273;
+      --border:     #252830;
+      --border2:    #2f3340;
+      --mono:       ui-monospace, "SF Mono", "Fira Code", Consolas, monospace;
+      --sans:       -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --sidebar-w:  230px;
+      --radius:     6px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--txt);
+      font-family: var(--sans);
+      font-size: 13.5px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────────────── */
+    .app   { display: flex; height: 100vh; overflow: hidden; }
+    .main  { flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
+
+    /* ── Sidebar ──────────────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .sb-logo {
+      padding: 22px 18px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sb-logo-name {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      color: var(--accent);
+    }
+    .sb-logo-sub {
+      font-size: 10.5px;
+      color: var(--txt3);
+      margin-top: 3px;
+      letter-spacing: .02em;
+    }
+
+    .sb-nav { flex: 1; padding: 14px 0; overflow-y: auto; }
+
+    .sb-section {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--txt3);
+      padding: 12px 18px 5px;
+    }
+
+    .sb-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 18px;
+      color: var(--txt2);
+      text-decoration: none;
+      font-size: 13px;
+      border-left: 2px solid transparent;
+      transition: background .12s, color .12s;
+    }
+    .sb-link:hover { background: var(--hover); color: var(--txt); }
+    .sb-link.active {
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    .sb-icon { width: 15px; height: 15px; flex-shrink: 0; }
+
+    .sb-status {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      color: var(--txt3);
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(34,197,94,.45); }
+      50%      { opacity:.75; box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+    }
+
+    /* ── Header ───────────────────────────────────────────────────────────── */
+    .pg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .pg-title { font-size: 18px; font-weight: 600; letter-spacing: .02em; }
+    .pg-date  { font-size: 11.5px; color: var(--txt3); font-family: var(--mono); }
+
+    /* ── Content ──────────────────────────────────────────────────────────── */
+    .pg-body { padding: 24px 28px; flex: 1; }
+
+    /* ── Card ─────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .card-title {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--txt3);
+      margin-bottom: 14px;
+    }
+
+    /* ── Scrollbar ────────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--txt3); }
+
+    /* ── Table ────────────────────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--txt3);
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table th.r, .data-table td.r { text-align: right; }
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .data-table tbody tr:hover td { background: var(--hover); }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+
+    .mono { font-family: var(--mono); }
+    .accent { color: var(--accent); }
+    .muted  { color: var(--txt2); }
+    .dim    { color: var(--txt3); }
+
+    /* ── Badge ────────────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 10.5px;
+      font-family: var(--mono);
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      color: var(--txt2);
+    }
+
+    /* ── Progress bar ─────────────────────────────────────────────────────── */
+    .progress-track {
+      height: 5px;
+      background: var(--bg4);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width .4s ease;
+    }
+
+    /* ── Empty state ──────────────────────────────────────────────────────── */
+    .empty {
+      padding: 40px;
+      text-align: center;
+      color: var(--txt3);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-name">CCTRACK</div>
+      <div class="sb-logo-sub">Claude Code Cost Tracker</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-section">Analytics</div>
+
+      <a href="/" class="sb-link{{if eq .Active "overview"}} active{{end}}">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/>
+        </svg>
+        Overview
+      </a>
+
+      <a href="/sessions" class="sb-link{{if eq .Active "sessions"}} active{{end}}">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5zM8.5 6.5a.5.5 0 0 1 .5.5v2.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7 9.793V7a.5.5 0 0 1 .5-.5z"/>
+        </svg>
+        Sessions
+      </a>
+
+      <a href="/projects" class="sb-link{{if eq .Active "projects"}} active{{end}}">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z"/>
+        </svg>
+        Projects
+      </a>
+
+      <div class="sb-section" style="margin-top:8px;">Config</div>
+
+      <a href="/settings" class="sb-link{{if eq .Active "settings"}} active{{end}}">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
+          <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.892 3.433-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.901-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52z"/>
+        </svg>
+        Settings
+      </a>
+
+      <a href="/rate-card" class="sb-link{{if eq .Active "rate-card"}} active{{end}}">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718z"/>
+          <path d="M7.591 3.467v3.153l-.53-.139c-.99-.255-1.49-.77-1.49-1.554 0-.82.604-1.346 1.49-1.46zm1.304 4.085c1.143.295 1.664.832 1.664 1.712 0 .966-.718 1.58-1.664 1.68z"/>
+        </svg>
+        Rate Card
+      </a>
+    </nav>
+
+    <div class="sb-status">
+      <div class="status-row">
+        <span class="status-dot"></span>
+        <span>Live — watching logs</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="pg-header">
+      <div class="pg-title">{{.Title}}</div>
+      <div class="pg-date">{{today}}</div>
+    </div>
+    <div class="pg-body">
+      {{template "content" .}}
+    </div>
+  </main>
+
+</div>
+</body>
+</html>
+{{end}}

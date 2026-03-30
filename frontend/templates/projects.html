@@ -1,0 +1,33 @@
+{{define "content"}}
+<div class="card">
+  <div class="card-title">All Projects</div>
+  {{if .Projects}}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th>Models</th>
+        <th class="r">Sessions</th>
+        <th class="r">Total Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Projects}}
+      <tr>
+        <td>
+          <span class="mono" style="font-size:12.5px;">{{.Name}}</span>
+        </td>
+        <td>
+          {{range .Models}}<span class="badge" style="margin-right:4px;">{{shortModel .}}</span>{{end}}
+        </td>
+        <td class="r mono dim">{{.Sessions}}</td>
+        <td class="r mono accent" style="font-weight:600;font-size:14px;">{{fmtCost .TotalCost}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="empty">No projects found. Make sure the Rust backend is running.</div>
+  {{end}}
+</div>
+{{end}}
