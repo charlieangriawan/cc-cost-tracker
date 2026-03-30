@@ -61,6 +61,9 @@ That's it. The dashboard opens at **http://localhost:45123**.
 | `make dev` | Start both servers (dev mode, auto-recompiles on change) |
 | `make run` | Build release binaries and run |
 | `make build` | Build release binaries only |
+| `make install-service` | Install as background service, auto-start on login |
+| `make uninstall-service` | Remove background service |
+| `make service-status` | Check if services are running |
 | `make clean` | Remove build artifacts |
 
 ---
